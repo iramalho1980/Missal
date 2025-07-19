@@ -41,22 +41,22 @@
             margin-bottom: 10px;
         }
 
-        .timer {
+         .timer {
             background: rgba(255, 255, 255, 0.1);
             backdrop-filter: blur(10px);
             border: 1px solid rgba(255, 255, 255, 0.2);
             border-radius: 20px;
             padding: 15px 30px;
             display: inline-block;
-            margin-bottom: 20px;
+            margin-bottom: 10px;
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
         }
 
-        .timer-display {
-            font-size: 2rem;
-            font-weight: 700;
-            color: #ffff00;
-            text-shadow: 0 0 10px rgba(255, 255, 0, 0.3);
+        .timer-controls {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 20px;
         }
 
         .main-content {
@@ -66,17 +66,71 @@
             min-height: 600px;
         }
 
-        .quadro {
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(15px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 25px;
-            padding: 25px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-            transition: all 0.3s ease;
+        @media (max-width: 1200px) {
+            .main-content {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .timer-display {
+                font-size: 1.5rem;
+            }
         }
 
-        .quadro:hover {
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+
+            .header h1 {
+                font-size: 1.8rem;
+            }
+
+            .timer-display {
+                font-size: 1.2rem;
+            }
+
+            .timer-controls {
+                flex-wrap: wrap;
+            }
+
+            .btn {
+                padding: 10px 20px;
+                font-size: 0.9rem;
+                margin: 5px;
+            }
+
+            .quadro {
+                padding: 15px;
+            }
+
+            .quadro h2 {
+                font-size: 1.3rem;
+            }
+
+            .cantico-item {
+                padding: 10px;
+                margin-bottom: 10px;
+            }
+
+            .cantico-titulo {
+                font-size: 1rem;
+            }
+
+            .cantico-input {
+                padding: 6px 10px;
+                font-size: 0.8rem;
+            }
+
+            .btn-adicionar {
+                padding: 8px 12px;
+                font-size: 0.8rem;
+            }
+        }   .quadro:hover {
             background: rgba(255, 255, 255, 0.08);
             border-color: rgba(255, 255, 0, 0.3);
             box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
@@ -349,6 +403,11 @@
             <h1>Organização de Cânticos da Missa</h1>
             <div class="timer">
                 <div class="timer-display" id="timer">00:00:00</div>
+            </div>
+            <div class="timer-controls">
+                <button class="btn" onclick="startTimer()">Start</button>
+                <button class="btn" onclick="stopTimer()">Stop</button>
+                <button class="btn" onclick="resetTimer()">Reset</button>
             </div>
         </div>
 
