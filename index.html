@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Organização de Cânticos da Missa</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Ubuntu+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Ubuntu Mono', monospace;
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 25%, #404040 50%, #2d2d2d 75%, #1a1a1a 100%);
+            min-height: 100vh;
+            color: white;
+            overflow-x: auto;
+        }
+
+        .container {
+            padding: 20px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #ffff00;
+            text-shadow: 0 0 20px rgba(255, 255, 0, 0.5);
+            margin-bottom: 10px;
+        }
+
+        .timer {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            padding: 15px 30px;
+            display: inline-block;
+            margin-bottom: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .timer-display {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #ffff00;
+            text-shadow: 0 0 10px rgba(255, 255, 0, 0.3);
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            min-height: 600px;
+        }
+
+        .quadro {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 25px;
+            padding: 25px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .quadro:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 255, 0, 0.3);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        .quadro h2 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #ffff00;
+            text-align: center;
+            margin-bottom: 20px;
+            text-shadow: 0 0 10px rgba(255, 255, 0, 0.3);
+        }
+
+        .cantico-item {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 15px;
+            padding: 15px;
+            margin-bottom: 15px;
+            cursor: grab;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .cantico-item:hover {
+            background: rgba(255, 255, 255, 0.12);
+            border-color: rgba(255, 255, 0, 0.4);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+        }
+
+        .cantico-item:active {
+            cursor: grabbing;
+        }
+
+        .cantico-item.dragging {
+            opacity: 0.5;
+            transform: rotate(5deg);
+        }
+
+        .cantico-titulo {
+            font-weight: 700;
+            color: #ffff00;
+            margin-bottom: 8px;
+            font-size: 1.1rem;
+        }
+
+        .cantico-input {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            padding: 8px 12px;
+            color: white;
+            font-family: 'Ubuntu Mono', monospace;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+
+        .cantico-input:focus {
+            outline: none;
+            border-color: #ffff00;
+            box-shadow: 0 0 10px rgba(255, 255, 0, 0.3);
+            background: rgba(0, 0, 0, 0.5);
+        }
+
+        .cantico-input::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .drop-zone {
+            min-height: 400px;
+            border: 2px dashed rgba(255, 255, 255, 0.3);
+            border-radius: 15px;
+            padding: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .drop-zone.drag-over {
+            border-color: #ffff00;
+            background: rgba(255, 255, 0, 0.1);
+            box-shadow: inset 0 0 20px rgba(255, 255, 0, 0.2);
+        }
+
+        .ordem-item {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            padding: 12px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .ordem-item:hover {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: rgba(255, 255, 0, 0.5);
+        }
+
+        .ordem-item.selected {
+            background: rgba(255, 255, 0, 0.2);
+            border-color: #ffff00;
+            box-shadow: 0 0 15px rgba(255, 255, 0, 0.3);
+        }
+
+        .ordem-item.dragging-reorder {
+            opacity: 0.5;
+            transform: rotate(2deg);
+            z-index: 1000;
+        }
+
+        .drag-handle {
+            cursor: grab;
+            color: rgba(255, 255, 0, 0.7);
+            font-weight: bold;
+            padding: 5px;
+            margin-right: 10px;
+            user-select: none;
+            transition: color 0.3s ease;
+        }
+
+        .drag-handle:hover {
+            color: #ffff00;
+        }
+
+        .drag-handle:active {
+            cursor: grabbing;
+        }
+
+        .item-content {
+            flex: 1;
+        }
+
+        .drop-indicator {
+            height: 3px;
+            background: #ffff00;
+            border-radius: 2px;
+            margin: 5px 0;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            box-shadow: 0 0 10px rgba(255, 255, 0, 0.5);
+        }
+
+        .drop-indicator.show {
+            opacity: 1;
+        }
+
+        .realizado-item {
+            background: rgba(0, 255, 0, 0.1);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(0, 255, 0, 0.3);
+            border-radius: 12px;
+            padding: 12px;
+            margin-bottom: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .realizado-item:hover {
+            background: rgba(0, 255, 0, 0.15);
+            box-shadow: 0 0 15px rgba(0, 255, 0, 0.2);
+        }
+
+        .btn-remover {
+            background: rgba(255, 0, 0, 0.2);
+            border: 1px solid rgba(255, 0, 0, 0.5);
+            border-radius: 8px;
+            color: white;
+            padding: 5px 10px;
+            cursor: pointer;
+            font-family: 'Ubuntu Mono', monospace;
+            font-size: 0.8rem;
+            transition: all 0.3s ease;
+        }
+
+        .btn-remover:hover {
+            background: rgba(255, 0, 0, 0.4);
+            box-shadow: 0 0 10px rgba(255, 0, 0, 0.3);
+        }
+
+        .controls {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .btn {
+            background: rgba(255, 255, 0, 0.2);
+            border: 1px solid #ffff00;
+            border-radius: 15px;
+            color: #ffff00;
+            padding: 12px 25px;
+            margin: 0 10px;
+            cursor: pointer;
+            font-family: 'Ubuntu Mono', monospace;
+            font-weight: 700;
+            transition: all 0.3s ease;
+        }
+
+        .btn:hover {
+            background: rgba(255, 255, 0, 0.3);
+            box-shadow: 0 0 20px rgba(255, 255, 0, 0.4);
+            transform: translateY(-2px);
+        }
+
+        @media (max-width: 1200px) {
+            .main-content {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .timer-display {
+                font-size: 1.5rem;
+            }
+        }
+
+        .empty-state {
+            text-align: center;
+            color: rgba(255, 255, 255, 0.6);
+            font-style: italic;
+            padding: 40px 20px;
+        }
+
+        .novo-item-container {
+            margin-bottom: 20px;
+            padding: 20px;
+            background: rgba(255, 255, 0, 0.05);
+            border: 1px solid rgba(255, 255, 0, 0.2);
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+        }
+
+        .novo-item-form {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .btn-adicionar {
+            background: rgba(255, 255, 0, 0.2);
+            border: 1px solid #ffff00;
+            border-radius: 10px;
+            color: #ffff00;
+            padding: 10px 15px;
+            cursor: pointer;
+            font-family: 'Ubuntu Mono', monospace;
+            font-weight: 700;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+
+        .btn-adicionar:hover {
+            background: rgba(255, 255, 0, 0.3);
+            box-shadow: 0 0 15px rgba(255, 255, 0, 0.4);
+            transform: translateY(-1px);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Organização de Cânticos da Missa</h1>
+            <div class="timer">
+                <div class="timer-display" id="timer">00:00:00</div>
+            </div>
+        </div>
+
+        <div class="main-content">
+
+
+            <!-- Quadro 2: Ordem da Missa -->
+            <div class="quadro">
+                <h2>Ordem da Missa</h2>
+                
+                <!-- Campo para adicionar novos itens -->
+                <div class="novo-item-container">
+                    <div class="novo-item-form">
+                        <select id="novo-titulo" class="cantico-input" style="margin-bottom: 8px;">
+                            <option value="">Selecione o tipo de cântico...</option>
+                            <option value="Entrada">Entrada</option>
+                            <option value="Ato Penitencial">Ato Penitencial</option>
+                            <option value="Glória">Glória</option>
+                            <option value="Salmo">Salmo</option>
+                            <option value="Aclamação">Aclamação</option>
+                            <option value="Ofertório">Ofertório</option>
+                            <option value="Santo">Santo</option>
+                            <option value="Paz">Paz</option>
+                            <option value="Cordeiro">Cordeiro</option>
+                            <option value="Comunhão">Comunhão</option>
+                            <option value="Final">Final</option>
+                            <option value="Trindade (opcional)">Trindade (opcional)</option>
+                            <option value="Bíblia (opcional)">Bíblia (opcional)</option>
+                            <option value="Pós Comunhão (opcional)">Pós Comunhão (opcional)</option>
+                            <option value="Outro">Outro</option>
+                        </select>
+                        <input type="text" id="novo-nome" class="cantico-input" placeholder="Nome do cântico..." style="margin-bottom: 8px;">
+                        <select id="novo-tom" class="cantico-input" style="margin-bottom: 10px;">
+                            <option value="">Selecione o tom...</option>
+                            <option value="C">C</option>
+                            <option value="C#">C#</option>
+                            <option value="D">D</option>
+                            <option value="D#">D#</option>
+                            <option value="E">E</option>
+                            <option value="F">F</option>
+                            <option value="F#">F#</option>
+                            <option value="G">G</option>
+                            <option value="G#">G#</option>
+                            <option value="A">A</option>
+                            <option value="A#">A#</option>
+                            <option value="B">B</option>
+                            <option value="Cm">Cm</option>
+                            <option value="C#m">C#m</option>
+                            <option value="Dm">Dm</option>
+                            <option value="D#m">D#m</option>
+                            <option value="Em">Em</option>
+                            <option value="Fm">Fm</option>
+                            <option value="F#m">F#m</option>
+                            <option value="Gm">Gm</option>
+                            <option value="G#m">G#m</option>
+                            <option value="Am">Am</option>
+                            <option value="A#m">A#m</option>
+                            <option value="Bm">Bm</option>
+                        </select>
+                        <button class="btn-adicionar" onclick="adicionarNovoItem()">+ Adicionar Item</button>
+                    </div>
+                </div>
+                
+                <div class="drop-zone" id="ordem-missa">
+                    <div class="empty-state">
+                        Arraste os cânticos aqui para formar a ordem da missa<br>
+                        <small style="opacity: 0.7;">ou use o formulário acima para adicionar itens personalizados</small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quadro 3: Realizado -->
+            <div class="quadro">
+                <h2>Realizado</h2>
+                <div id="realizado">
+                    <div class="empty-state">
+                        Clique nos itens da ordem da missa para marcá-los como realizados
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <button class="btn" onclick="startTimer()">Start</button>
+            <button class="btn" onclick="stopTimer()">Stop</button>
+            <button class="btn" onclick="resetTimer()">Reset</button>
+            <button class="btn" onclick="clearAll()">Limpar Tudo</button>
+        </div>
+    </div>
+
+    <script>
+        // Timer
+        let startTime = 0;
+        let pausedTime = 0;
+        let timerInterval;
+        let isRunning = false;
+
+        function updateTimer() {
+            if (!isRunning) return;
+            const elapsed = Date.now() - startTime + pausedTime;
+            const hours = Math.floor(elapsed / 3600000);
+            const minutes = Math.floor((elapsed % 3600000) / 60000);
+            const seconds = Math.floor((elapsed % 60000) / 1000);
+            
+            document.getElementById('timer').textContent = 
+                `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+
+        function startTimer() {
+            if (!isRunning) {
+                startTime = Date.now();
+                timerInterval = setInterval(updateTimer, 1000);
+                isRunning = true;
+            }
+        }
+
+        function stopTimer() {
+            if (isRunning) {
+                clearInterval(timerInterval);
+                pausedTime += Date.now() - startTime;
+                isRunning = false;
+            }
+        }
+
+        function resetTimer() {
+            clearInterval(timerInterval);
+            startTime = 0;
+            pausedTime = 0;
+            isRunning = false;
+            document.getElementById('timer').textContent = '00:00:00';
+        }
+
+        function clearAll() {
+            document.getElementById('ordem-missa').innerHTML = '<div class="empty-state">Use o formulário acima para adicionar itens personalizados</div>';
+            document.getElementById('realizado').innerHTML = '<div class="empty-state">Clique nos itens da ordem da missa para marcá-los como realizados</div>';
+            
+            // Limpar campos do novo item
+            document.getElementById('novo-titulo').value = '';
+            document.getElementById('novo-nome').value = '';
+            
+            resetTimer();
+        }
+
+        // Drag and Drop
+        let draggedElement = null;
+
+        document.addEventListener("DOMContentLoaded", function() {
+            const ordemZone = document.getElementById("ordem-missa");
+            const realizadoZone = document.getElementById("realizado");
+
+            ordemZone.addEventListener("dragover", function(e) {
+                e.preventDefault();
+                this.classList.add("drag-over");
+            });
+
+            ordemZone.addEventListener("dragleave", function(e) {
+                if (!this.contains(e.relatedTarget)) {
+                    this.classList.remove("drag-over");
+                }
+            });
+
+            ordemZone.addEventListener("drop", function(e) {
+                e.preventDefault();
+                this.classList.remove("drag-over");
+                
+                // Se o item arrastado for um item de reordenação, não faça nada aqui
+                if (e.dataTransfer.getData("text/plain") === "reorder") {
+                    return;
+                }
+
+                // A partir de agora, o drop só deve ocorrer de itens personalizados adicionados
+                // ou de um drag de fora que não seja \'reorder\'
+                const data = JSON.parse(e.dataTransfer.getData("text/plain"));
+                
+                // Remover empty state se existir
+                const emptyState = this.querySelector(".empty-state");
+                if (emptyState) {
+                    emptyState.remove();
+                }
+                
+                // Criar item na ordem
+                const ordemItem = document.createElement("div");
+                ordemItem.className = "ordem-item";
+                ordemItem.draggable = true;
+                ordemItem.innerHTML = `
+                    <div class="drag-handle">⋮⋮</div>
+                    <div class="item-content">
+                        <strong>${data.titulo}</strong><br>
+                        <small>${data.nome}</small>
+                    </div>
+                    <button class="btn-remover" onclick="removeFromOrdem(this)">Remover</button>
+                `;
+                
+                ordemItem.addEventListener("click", function(e) {
+                    if (e.target.classList.contains("btn-remover")) return;
+                    if (e.target.classList.contains("drag-handle")) return;
+                    
+                    this.classList.add("selected");
+                    moveToRealizado(this);
+                });
+                
+                // Adicionar eventos de drag para reordenação
+                setupDragForReorder(ordemItem);
+                
+                this.appendChild(ordemItem);
+            });
+        });
+
+        function removeFromOrdem(button) {
+            const item = button.parentElement;
+            item.remove();
+            
+            // Verificar se ficou vazio
+            const ordemZone = document.getElementById('ordem-missa');
+            if (ordemZone.children.length === 0) {
+                ordemZone.innerHTML = '<div class="empty-state">Arraste os cânticos aqui para formar a ordem da missa<br><small style="opacity: 0.7;">ou use o formulário acima para adicionar itens personalizados</small></div>';
+            }
+        }
+
+        function moveToRealizado(ordemItem) {
+            const realizadoZone = document.getElementById('realizado');
+            
+            // Remover empty state se existir
+            const emptyState = realizadoZone.querySelector('.empty-state');
+            if (emptyState) {
+                emptyState.remove();
+            }
+            
+            // Criar item realizado
+            const realizadoItem = document.createElement('div');
+            realizadoItem.className = 'realizado-item';
+            const itemContent = ordemItem.querySelector('.item-content');
+            if (itemContent) {
+                realizadoItem.innerHTML = itemContent.innerHTML;
+            } else {
+                // Fallback para itens antigos sem .item-content
+                const firstDiv = ordemItem.querySelector('div:not(.drag-handle)');
+                realizadoItem.innerHTML = firstDiv ? firstDiv.innerHTML : ordemItem.innerHTML;
+            }
+            
+            realizadoZone.appendChild(realizadoItem);
+            
+            // Remover da ordem
+            ordemItem.remove();
+            
+            // Verificar se ordem ficou vazia
+            const ordemZone = document.getElementById('ordem-missa');
+            if (ordemZone.children.length === 0) {
+                ordemZone.innerHTML = '<div class="empty-state">Arraste os cânticos aqui para formar a ordem da missa<br><small style="opacity: 0.7;">ou use o formulário acima para adicionar itens personalizados</small></div>';
+            }
+        }
+
+        function adicionarNovoItem() {
+            const tituloSelect = document.getElementById("novo-titulo");
+            const nomeInput = document.getElementById("novo-nome");
+            const tomSelect = document.getElementById("novo-tom");
+            
+            let titulo = tituloSelect.value.trim();
+            const nome = nomeInput.value.trim();
+            const tom = tomSelect.value.trim();
+            
+            if (!titulo) {
+                alert("Por favor, selecione um tipo de cântico.");
+                tituloSelect.focus();
+                return;
+            }
+            
+            if (titulo === "Outro") {
+                const customTitulo = prompt("Por favor, digite o título personalizado para o cântico:");
+                if (customTitulo) {
+                    titulo = customTitulo.trim();
+                } else {
+                    alert("Título personalizado não pode ser vazio.");
+                    return;
+                }
+            }
+
+            if (!nome) {
+                alert("Por favor, digite o nome do cântico.");
+                nomeInput.focus();
+                return;
+            }
+
+            if (!tom) {
+                alert("Por favor, selecione o tom da música.");
+                tomSelect.focus();
+                return;
+            }
+            
+            const ordemZone = document.getElementById("ordem-missa");
+            
+            // Remover empty state se existir
+            const emptyState = ordemZone.querySelector(".empty-state");
+            if (emptyState) {
+                emptyState.remove();
+            }
+            
+            // Criar item na ordem
+            const ordemItem = document.createElement("div");
+            ordemItem.className = "ordem-item";
+            ordemItem.draggable = true;
+            ordemItem.innerHTML = `
+                <div class="drag-handle">⋮⋮</div>
+                <div class="item-content">
+                    <strong>${titulo}</strong><br>
+                    <small>${nome} (${tom})</small>
+                </div>
+                <button class="btn-remover" onclick="removeFromOrdem(this)">Remover</button>
+            `;
+            
+            ordemItem.addEventListener("click", function(e) {
+                if (e.target.classList.contains("btn-remover")) return;
+                if (e.target.classList.contains("drag-handle")) return;
+                
+                this.classList.add("selected");
+                moveToRealizado(this);
+            });
+            
+            // Adicionar eventos de drag para reordenação
+            setupDragForReorder(ordemItem);
+            
+            ordemZone.appendChild(ordemItem);
+            
+            // Limpar campos
+            tituloSelect.value = "";
+            nomeInput.value = "";
+            tomSelect.value = "";
+            tituloSelect.focus();
+        }
+
+        // Função para configurar drag and drop para reordenação
+        function setupDragForReorder(item) {
+            item.addEventListener('dragstart', function(e) {
+                if (!e.target.classList.contains('drag-handle') && !e.target.closest('.drag-handle')) {
+                    e.preventDefault();
+                    return;
+                }
+                
+                this.classList.add('dragging-reorder');
+                e.dataTransfer.setData('text/plain', 'reorder');
+                e.dataTransfer.effectAllowed = 'move';
+            });
+
+            item.addEventListener('dragend', function() {
+                this.classList.remove('dragging-reorder');
+                removeAllDropIndicators();
+            });
+
+            item.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                e.dataTransfer.dropEffect = 'move';
+                
+                if (e.dataTransfer.getData('text/plain') === 'reorder') {
+                    const draggingItem = document.querySelector('.dragging-reorder');
+                    if (draggingItem && draggingItem !== this) {
+                        const rect = this.getBoundingClientRect();
+                        const midY = rect.top + rect.height / 2;
+                        
+                        removeAllDropIndicators();
+                        
+                        if (e.clientY < midY) {
+                            showDropIndicator(this, 'before');
+                        } else {
+                            showDropIndicator(this, 'after');
+                        }
+                    }
+                }
+            });
+
+            item.addEventListener('drop', function(e) {
+                e.preventDefault();
+                
+                if (e.dataTransfer.getData('text/plain') === 'reorder') {
+                    const draggingItem = document.querySelector('.dragging-reorder');
+                    if (draggingItem && draggingItem !== this) {
+                        const rect = this.getBoundingClientRect();
+                        const midY = rect.top + rect.height / 2;
+                        
+                        if (e.clientY < midY) {
+                            this.parentNode.insertBefore(draggingItem, this);
+                        } else {
+                            this.parentNode.insertBefore(draggingItem, this.nextSibling);
+                        }
+                    }
+                }
+                
+                removeAllDropIndicators();
+            });
+        }
+
+        function showDropIndicator(item, position) {
+            const indicator = document.createElement('div');
+            indicator.className = 'drop-indicator show';
+            
+            if (position === 'before') {
+                item.parentNode.insertBefore(indicator, item);
+            } else {
+                item.parentNode.insertBefore(indicator, item.nextSibling);
+            }
+        }
+
+        function removeAllDropIndicators() {
+            document.querySelectorAll('.drop-indicator').forEach(indicator => {
+                indicator.remove();
+            });
+        }
+    </script>
+</body>
+</html>
+
