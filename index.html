@@ -162,140 +162,32 @@
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
             padding: 15px;
             flex: 1;
-            min-height: 200px;
+            min-height: 350px; /* Aumentado para 350px */
             overflow-y: auto;
         }
 
-        .quadro h2 {
-            color: #f0f0f0;
-            font-size: 1.2rem;
-            font-weight: 700;
-            margin-bottom: 15px;
-            text-align: center;
-            text-shadow: 0 0 8px rgba(255, 255, 0, 0.2);
-            letter-spacing: 1px;
-        }
-
-        .cantico-item {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            border-radius: 12px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            padding: 12px;
-            margin-bottom: 8px;
-            cursor: move;
-            transition: all 0.3s ease;
-            position: relative;
-        }
-
-        .cantico-item:hover {
-            background: rgba(255, 255, 255, 0.15);
-            transform: translateY(-1px);
-            box-shadow: 0 4px 15px rgba(255, 255, 0, 0.1);
-        }
-
-        .cantico-item.dragging {
-            opacity: 0.5;
-            transform: rotate(5deg);
-        }
-
-        .cantico-info {
-            display: flex;
-            flex-direction: column;
-            gap: 3px;
-        }
-
-        .cantico-tipo {
-            font-size: 0.7rem;
-            color: #ffd700;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .cantico-nome {
-            font-size: 0.9rem;
-            color: #ffffff;
-            font-weight: 400;
-        }
-
-        .cantico-tom {
-            font-size: 0.8rem;
-            color: #c0c0c0;
-        }
-
-        .cantico-actions {
-            position: absolute;
-            top: 8px;
-            right: 8px;
-            display: flex;
-            gap: 5px;
-        }
-
-        .btn-small {
-            padding: 4px 8px;
-            font-size: 0.7rem;
-            border-radius: 6px;
-            border: none;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            font-family: 'Ubuntu Mono', monospace;
-        }
-
-        .btn-edit {
-            background: rgba(0, 123, 255, 0.8);
-            color: white;
-        }
-
-        .btn-delete {
-            background: rgba(220, 53, 69, 0.8);
-            color: white;
-        }
-
-        .btn-small:hover {
-            transform: scale(1.1);
-        }
-
-        .lista-vazia {
-            text-align: center;
-            color: #888;
-            font-style: italic;
+        /* Estilos para o novo quadro do timer */
+        .timer-and-new-controls {
+            margin-top: 15px;
             padding: 20px;
-            font-family: 'Ubuntu Mono', monospace;
+            text-align: center;
         }
 
-        .realizado {
-            background: rgba(40, 167, 69, 0.2);
-            border-color: rgba(40, 167, 69, 0.4);
+        .timer-and-new-controls h2 {
+            margin-bottom: 20px;
         }
 
-        .realizado .cantico-nome {
-            text-decoration: line-through;
-            opacity: 0.7;
-        }
+        /* Ajustes para botões em telas menores */
+        @media (max-width: 767px) {
+            .timer-btn, .btn {
+                width: 100%; /* Ocupa a largura total em mobile */
+                margin-bottom: 10px; /* Espaçamento entre botões */
+            }
 
-        .drag-over {
-            border-color: rgba(255, 255, 0, 0.6);
-            background: rgba(255, 255, 0, 0.1);
-        }
-
-        /* Scrollbar personalizada */
-        .quadro::-webkit-scrollbar {
-            width: 6px;
-        }
-
-        .quadro::-webkit-scrollbar-track {
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 3px;
-        }
-
-        .quadro::-webkit-scrollbar-thumb {
-            background: rgba(255, 255, 0, 0.3);
-            border-radius: 3px;
-        }
-
-        .quadro::-webkit-scrollbar-thumb:hover {
-            background: rgba(255, 255, 0, 0.5);
+            .timer-controls, .save-load-controls, .modal-buttons {
+                flex-direction: column; /* Botões empilhados em mobile */
+                gap: 0; /* Remove o gap padrão */
+            }
         }
 
         /* Responsivo para mobile */
@@ -525,23 +417,6 @@
 </head>
 <body>
     <div class="container">
-        <!-- Título Principal e Timer -->
-        <div class="main-title">
-            <h1>📿 ORDEM DA MISSA</h1>
-            <div class="timer-container">
-                <div class="timer-display" id="timerDisplay">00:00:00</div>
-                <div class="timer-controls">
-                    <button class="timer-btn btn-start" id="startBtn">▶ Start</button>
-                    <button class="timer-btn btn-stop" id="stopBtn" disabled>⏸ Stop</button>
-                    <button class="timer-btn btn-reset" id="resetBtn">🔄 Reset</button>
-                </div>
-                <div class="save-load-controls">
-                    <button class="timer-btn btn-save" id="saveBtn">💾 Salvar</button>
-                    <button class="timer-btn btn-load" id="loadBtn">📂 Carregar</button>
-                </div>
-            </div>
-        </div>
-
         <!-- Quadros -->
         <div class="quadros-container">
             <!-- Quadro 1: Lista de Cânticos -->
@@ -557,6 +432,24 @@
                 <h2>✅ Realizados</h2>
                 <div id="canticosRealizados" class="lista-canticos">
                     <div class="lista-vazia">Nenhum cântico realizado ainda</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Novo Quadro para Timer e Controles -->
+        <div class="quadro timer-and-new-controls">
+            <h2>⏱️ Timer e Controles</h2>
+            <div class="timer-container">
+                <div class="timer-display" id="timerDisplay">00:00:00</div>
+                <div class="timer-controls">
+                    <button class="timer-btn btn-start" id="startBtn">▶ Start</button>
+                    <button class="timer-btn btn-stop" id="stopBtn" disabled>⏸ Stop</button>
+                    <button class="timer-btn btn-reset" id="resetBtn">🔄 Reset</button>
+                </div>
+                <div class="save-load-controls">
+                    <button class="timer-btn btn-save" id="saveBtn">💾 Salvar</button>
+                    <button class="timer-btn btn-load" id="loadBtn">📂 Carregar</button>
+                    <button class="timer-btn btn-new" id="newBtn">✨ Novo</button>
                 </div>
             </div>
         </div>
@@ -724,6 +617,7 @@
                 // Eventos de salvar/carregar
                 const saveBtn = document.getElementById("saveBtn");
                 const loadBtn = document.getElementById("loadBtn");
+                const newBtn = document.getElementById("newBtn"); // Novo botão
                 const modalSave = document.getElementById("modalSave");
                 const modalLoad = document.getElementById("modalLoad");
                 const formSave = document.getElementById("formSave");
@@ -732,6 +626,7 @@
 
                 saveBtn.addEventListener("click", () => this.abrirModalSalvar());
                 loadBtn.addEventListener("click", () => this.abrirModalCarregar());
+                newBtn.addEventListener("click", () => this.novaOrdem()); // Evento para o novo botão
                 formSave.addEventListener("submit", (e) => this.salvarConfiguracao(e));
                 cancelSaveBtn.addEventListener("click", () => this.fecharModalSalvar());
                 cancelLoadBtn.addEventListener("click", () => this.fecharModalCarregar());
@@ -753,6 +648,13 @@
                 window.addEventListener("beforeunload", () => {
                     this.limparDadosAtuais();
                 });
+            }
+
+            novaOrdem() {
+                if (confirm("Tem certeza que deseja iniciar uma nova ordem? A ordem atual será perdida se não for salva.")) {
+                    this.limparDadosAtuais();
+                    alert("Nova ordem iniciada!");
+                }
             }
 
             limparDadosAtuais() {
