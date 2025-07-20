@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ordem da Missa</title>
+    <link href="https://fonts.googleapis.com/css2?family=Ubuntu+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Ubuntu Mono', monospace;
+            background: linear-gradient(135deg, #000000 0%, #1a1a1a 25%, #2d4a3e 50%, #4a6b5a 75%, #6b8e7a 100%);
+            min-height: 100vh;
+            padding: 10px;
+            color: #ffffff;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 100%;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            height: 100vh;
+        }
+
+        .main-title {
+            text-align: center;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            margin-bottom: 10px;
+        }
+
+        .main-title h1 {
+            color: #f0f0f0;
+            font-size: 1.8em;
+            font-weight: 700;
+            text-shadow: 0 0 15px rgba(255, 255, 255, 0.4);
+            letter-spacing: 2px;
+            margin-bottom: 15px;
+        }
+
+
+
+        .section-title {
+            font-size: 1.5em;
+            font-weight: 600;
+            color: #f0f0f0;
+            margin-top: 20px;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            width: 100%;
+            max-width: 600px;
+            padding: 0 10px;
+        }
+
+        .input-group input[type="text"],
+        .input-group select {
+            flex-grow: 1;
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            background: rgba(255, 255, 255, 0.1);
+            color: #ffffff;
+            font-size: 1em;
+            outline: none;
+            transition: border-color 0.3s ease;
+        }
+
+        .input-group input[type="text"]::placeholder {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .input-group input[type="text"]:focus,
+        .input-group select:focus {
+            border-color: #6b8e7a;
+        }
+
+        .input-group button {
+            background: linear-gradient(135deg, #4a6b5a 0%, #6b8e7a 100%);
+            color: #ffffff;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.2em;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .input-group button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .cantico-list {
+            list-style: none;
+            padding: 0;
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .cantico-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(15px);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+            cursor: grab;
+        }
+
+        .cantico-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .cantico-item.dragging {
+            opacity: 0.5;
+            border: 2px dashed #6b8e7a;
+        }
+
+        .cantico-item.completed {
+            text-decoration: line-through;
+            opacity: 0.6;
+            background: rgba(107, 142, 122, 0.2);
+        }
+
+        .cantico-info {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .cantico-info .title {
+            font-size: 1.1em;
+            font-weight: 600;
+            color: #f0f0f0;
+        }
+
+        .cantico-info .details {
+            font-size: 0.8em;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .cantico-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .cantico-actions button {
+            background: none;
+            border: none;
+            color: #ffffff;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+
+        .cantico-actions button:hover {
+            color: #6b8e7a;
+        }
+
+        .save-load-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .save-load-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .save-load-buttons button {
+            background: linear-gradient(135deg, #4a6b5a 0%, #6b8e7a 100%);
+            color: #ffffff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .save-load-buttons button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .saved-configs-list {
+            list-style: none;
+            padding: 0;
+            width: 100%;
+            max-width: 600px;
+            margin-top: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .saved-config-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 15px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .saved-config-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .saved-config-info {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .saved-config-info .name {
+            font-size: 1.1em;
+            font-weight: 600;
+            color: #f0f0f0;
+        }
+
+        .saved-config-info .date {
+            font-size: 0.8em;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .saved-config-actions button {
+            background: none;
+            border: none;
+            color: #ffffff;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+
+        .saved-config-actions button:hover {
+            color: #6b8e7a;
+        }
+
+        @media (max-width: 768px) {
+            .input-group {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .input-group input[type="text"],
+            .input-group select,
+            .input-group button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="main-title">
+            <h1>Ordem da Missa</h1>
+        </header>
+
+
+
+        <section>
+            <h2 class="section-title">Lista de Cânticos</h2>
+            <div class="input-group">
+                <input type="text" id="canticoInput" placeholder="Nome do Cântico">
+                <select id="tipoCanticoSelect">
+                    <option value="Entrada">Entrada</option>
+                    <option value="Ato Penitencial">Ato Penitencial</option>
+                    <option value="Glória">Glória</option>
+                    <option value="Salmo Responsorial">Salmo Responsorial</option>
+                    <option value="Aclamação ao Evangelho">Aclamação ao Evangelho</option>
+                    <option value="Apresentação das Oferendas">Apresentação das Oferendas</option>
+                    <option value="Santo">Santo</option>
+                    <option value="Cordeiro de Deus">Cordeiro de Deus</option>
+                    <option value="Comunhão">Comunhão</option>
+                    <option value="Ação de Graças">Ação de Graças</option>
+                    <option value="Final">Final</option>
+                    <option value="Meditação">Meditação</option>
+                    <option value="Adoração">Adoração</option>
+                </select>
+                <select id="tomCanticoSelect">
+                    <option value="C">C</option>
+                    <option value="Cm">Cm</option>
+                    <option value="C#">C#</option>
+                    <option value="C#m">C#m</option>
+                    <option value="Db">Db</option>
+                    <option value="Dbm">Dbm</option>
+                    <option value="D">D</option>
+                    <option value="Dm">Dm</option>
+                    <option value="D#">D#</option>
+                    <option value="D#m">D#m</option>
+                    <option value="Eb">Eb</option>
+                    <option value="Ebm">Ebm</option>
+                    <option value="E">E</option>
+                    <option value="Em">Em</option>
+                    <option value="F">F</option>
+                    <option value="Fm">Fm</option>
+                    <option value="F#">F#</option>
+                    <option value="F#m">F#m</option>
+                    <option value="Gb">Gb</option>
+                    <option value="Gbm">Gbm</option>
+                    <option value="G">G</option>
+                    <option value="Gm">Gm</option>
+                    <option value="G#">G#</option>
+                    <option value="G#m">G#m</option>
+                    <option value="Ab">Ab</option>
+                    <option value="Abm">Abm</option>
+                    <option value="A">A</option>
+                    <option value="Am">Am</option>
+                    <option value="A#">A#</option>
+                    <option value="A#m">A#m</option>
+                    <option value="Bb">Bb</option>
+                    <option value="Bbm">Bbm</option>
+                    <option value="B">B</option>
+                    <option value="Bm">Bm</option>
+                </select>
+                <button id="addCanticoButton">+</button>
+            </div>
+            <ul id="canticoList" class="cantico-list"></ul>
+        </section>
+
+        <section class="save-load-container">
+            <h2 class="section-title">Salvar e Carregar Configurações</h2>
+            <div class="save-load-buttons">
+                <button id="saveButton">💾 Salvar</button>
+                <button id="loadButton">📂 Carregar</button>
+            </div>
+            <ul id="savedConfigsList" class="saved-configs-list"></ul>
+        </section>
+    </div>
+
+    <script>
+        const canticoInput = document.getElementById('canticoInput');
+        const tipoCanticoSelect = document.getElementById('tipoCanticoSelect');
+        const tomCanticoSelect = document.getElementById('tomCanticoSelect');
+        const addCanticoButton = document.getElementById('addCanticoButton');
+        const canticoList = document.getElementById('canticoList');
+        const saveButton = document.getElementById('saveButton');
+        const loadButton = document.getElementById('loadButton');
+        const savedConfigsList = document.getElementById('savedConfigsList');
+
+        let canticos = [];
+        let realizados = [];
+
+        function renderCanticos() {
+            canticoList.innerHTML = '';
+            [...canticos, ...realizados].forEach((cantico, index) => {
+                const li = document.createElement('li');
+                li.classList.add('cantico-item');
+                if (cantico.completed) {
+                    li.classList.add('completed');
+                }
+                li.setAttribute('draggable', !cantico.completed);
+                li.dataset.id = cantico.id;
+
+                li.innerHTML = `
+                    <div class="cantico-info">
+                        <span class="title">${cantico.nome}</span>
+                        <span class="details">${cantico.tipo} - ${cantico.tom}</span>
+                    </div>
+                    <div class="cantico-actions">
+                        <button class="edit-button" data-id="${cantico.id}">✏️</button>
+                        <button class="delete-button" data-id="${cantico.id}">🗑️</button>
+                    </div>
+                `;
+
+                li.addEventListener('click', (e) => {
+                    if (!e.target.closest('.cantico-actions')) {
+                        toggleCanticoCompletion(cantico.id);
+                    }
+                });
+
+                li.querySelector('.edit-button').addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    editCantico(cantico.id);
+                });
+
+                li.querySelector('.delete-button').addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    deleteCantico(cantico.id);
+                });
+
+                canticoList.appendChild(li);
+            });
+            addDragAndDropListeners();
+        }
+
+        function addCantico() {
+            const nome = canticoInput.value.trim();
+            const tipo = tipoCanticoSelect.value;
+            const tom = tomCanticoSelect.value;
+
+            if (nome) {
+                const newCantico = {
+                    id: Date.now(),
+                    nome,
+                    tipo,
+                    tom,
+                    completed: false
+                };
+                canticos.push(newCantico);
+                canticoInput.value = '';
+                renderCanticos();
+                saveCurrentConfigToLocalStorage('auto-save');
+            }
+        }
+
+        function toggleCanticoCompletion(id) {
+            const index = canticos.findIndex(c => c.id === id);
+            if (index !== -1) {
+                const [cantico] = canticos.splice(index, 1);
+                cantico.completed = !cantico.completed;
+                if (cantico.completed) {
+                    realizados.push(cantico);
+                } else {
+                    canticos.push(cantico);
+                }
+            } else {
+                const realIndex = realizados.findIndex(c => c.id === id);
+                if (realIndex !== -1) {
+                    const [cantico] = realizados.splice(realIndex, 1);
+                    cantico.completed = !cantico.completed;
+                    canticos.push(cantico);
+                }
+            }
+            renderCanticos();
+            saveCurrentConfigToLocalStorage('auto-save');
+        }
+
+        function editCantico(id) {
+            let canticoToEdit = canticos.find(c => c.id === id) || realizados.find(c => c.id === id);
+            if (canticoToEdit) {
+                const newName = prompt('Editar nome do cântico:', canticoToEdit.nome);
+                if (newName !== null && newName.trim() !== '') {
+                    canticoToEdit.nome = newName.trim();
+                    renderCanticos();
+                    saveCurrentConfigToLocalStorage('auto-save');
+                }
+            }
+        }
+
+        function deleteCantico(id) {
+            canticos = canticos.filter(c => c.id !== id);
+            realizados = realizados.filter(c => c.id !== id);
+            renderCanticos();
+            saveCurrentConfigToLocalStorage('auto-save');
+        }
+
+        addCanticoButton.addEventListener('click', addCantico);
+
+        let draggedItem = null;
+
+        function addDragAndDropListeners() {
+            document.querySelectorAll('.cantico-item[draggable="true"]').forEach(item => {
+                item.addEventListener('dragstart', (e) => {
+                    draggedItem = item;
+                    setTimeout(() => {
+                        item.classList.add('dragging');
+                    }, 0);
+                });
+
+                item.addEventListener('dragend', () => {
+                    draggedItem.classList.remove('dragging');
+                    draggedItem = null;
+                });
+
+                item.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    const afterElement = getDragAfterElement(canticoList, e.clientY);
+                    const currentDraggable = document.querySelector('.dragging');
+                    if (afterElement == null) {
+                        canticoList.appendChild(currentDraggable);
+                    } else {
+                        canticoList.insertBefore(currentDraggable, afterElement);
+                    }
+                });
+
+                item.addEventListener('drop', () => {
+                    const newOrder = Array.from(canticoList.children).map(li => {
+                        const id = parseInt(li.dataset.id);
+                        return canticos.find(c => c.id === id) || realizados.find(c => c.id === id);
+                    });
+                    canticos = newOrder.filter(c => !c.completed);
+                    realizados = newOrder.filter(c => c.completed);
+                    saveCurrentConfigToLocalStorage('auto-save');
+                });
+            });
+        }
+
+        function getDragAfterElement(container, y) {
+            const draggableElements = [...container.querySelectorAll('.cantico-item:not(.dragging)')];
+
+            return draggableElements.reduce((closest, child) => {
+                const box = child.getBoundingClientRect();
+                const offset = y - box.top - box.height / 2;
+                if (offset < 0 && offset > closest.offset) {
+                    return { offset: offset, element: child };
+                } else {
+                    return closest;
+                }
+            }, { offset: -Infinity }).element;
+        }
+
+        function saveCurrentConfigToLocalStorage(name) {
+            const config = {
+                id: Date.now(),
+                nome: name === 'auto-save' ? 'Auto-salvo' : name,
+                data: new Date().toLocaleString(),
+                canticos: canticos,
+                realizados: realizados
+            };
+            let savedConfigs = JSON.parse(localStorage.getItem('missalConfigs')) || [];
+            if (name === 'auto-save') {
+                savedConfigs = savedConfigs.filter(cfg => cfg.nome !== 'Auto-salvo');
+            }
+            savedConfigs.push(config);
+            localStorage.setItem('missalConfigs', JSON.stringify(savedConfigs));
+            renderSavedConfigs();
+        }
+
+        function loadConfigFromLocalStorage(id) {
+            let savedConfigs = JSON.parse(localStorage.getItem('missalConfigs')) || [];
+            const configToLoad = savedConfigs.find(cfg => cfg.id === id);
+            if (configToLoad) {
+                canticos = configToLoad.canticos || [];
+                realizados = configToLoad.realizados || [];
+                renderCanticos();
+            }
+        }
+
+        function deleteSavedConfig(id) {
+            let savedConfigs = JSON.parse(localStorage.getItem('missalConfigs')) || [];
+            savedConfigs = savedConfigs.filter(cfg => cfg.id !== id);
+            localStorage.setItem('missalConfigs', JSON.stringify(savedConfigs));
+            renderSavedConfigs();
+        }
+
+        function renderSavedConfigs() {
+            savedConfigsList.innerHTML = '';
+            let savedConfigs = JSON.parse(localStorage.getItem('missalConfigs')) || [];
+            savedConfigs.forEach(config => {
+                const li = document.createElement('li');
+                li.classList.add('saved-config-item');
+                li.innerHTML = `
+                    <div class="saved-config-info">
+                        <span class="name">${config.nome}</span>
+                        <span class="date">${config.data}</span>
+                    </div>
+                    <div class="saved-config-actions">
+                        <button class="load-button" data-id="${config.id}">📂</button>
+                        <button class="delete-button" data-id="${config.id}">🗑️</button>
+                    </div>
+                `;
+                li.querySelector('.load-button').addEventListener('click', () => loadConfigFromLocalStorage(config.id));
+                li.querySelector('.delete-button').addEventListener('click', () => deleteSavedConfig(config.id));
+                savedConfigsList.appendChild(li);
+            });
+        }
+
+        saveButton.addEventListener('click', () => {
+            const configName = prompt('Nome para salvar a configuração:');
+            if (configName) {
+                saveCurrentConfigToLocalStorage(configName);
+            }
+        });
+
+        loadButton.addEventListener('click', () => {
+            renderSavedConfigs();
+        });
+
+        // Initial render
+        renderCanticos();
+        renderSavedConfigs();
+        saveCurrentConfigToLocalStorage('auto-save'); // Auto-save on initial load
+
+        // Load auto-save on page load
+        const autoSaveConfig = (JSON.parse(localStorage.getItem('missalConfigs')) || []).find(cfg => cfg.nome === 'Auto-salvo');
+        if (autoSaveConfig) {
+            canticos = autoSaveConfig.canticos || [];
+            realizados = autoSaveConfig.realizados || [];
+            renderCanticos();
+        }
+    </script>
+</body>
+</html>
+
